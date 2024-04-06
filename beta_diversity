@@ -1,0 +1,90 @@
+#Installer les packages
+#install.packages(c("betapart", "recluster", "dendextend", "vegan", "rnaturalearth"))
+#charger les packages
+library(betapart)
+library(recluster)
+library(dendextend)
+library(vegan)
+library(rnaturalearth)
+library(sf)
+library(bioregion)
+library(ggplot2)
+library(rnaturalearthdata)
+#charger les données
+setwd("C:/R")
+subtidaldb  <- readRDS("invertebres_benthiques.RDS")
+sites <- readRDS("sites_invertebresbenthiques.RDS")
+#convertir les données
+sites <- st_as_sf(sites,
+                  coords = c("X", "Y"),
+                  crs = "EPSG:4326")
+#calculer la richesse spécifique
+richness_sp <- rowSums(subtidaldb)
+richness_site <- colSums(subtidaldb)
+sites <- sites[richness_site >= 10, ]
+#création d'une matrice
+matrice_inv <- as.matrix(subtidaldb)
+matrice_inv <- t(matrice_inv)
+#calcul des indices de simpson et comparaison dans chaque site
+Beta_sim <- dissimilarity(matrice_inv, metric = "Simpson")
+#visualisation de la distance entre les sites
+matrix.dist <- net_to_mat(Beta_sim,
+                          weight = TRUE, squared = TRUE, symmetrical = TRUE)
+matrix.dist <- as.dist(matrix.dist)
+NMDS <- metaMDS(matrix.dist) #calcul de Non-Metric Dimensional Scaling (NMDS) pour représenter graphiquement les distances entre les sites
+col_subtidal <- recluster.col(NMDS$points)
+col_subtidal_plot <- recluster.plot.col(col_subtidal)
+colnames(col_subtidal) <- c("nmdsx", "nmdsy", "nmdsred", "nmdsgreen", "nmdsblue")
+sites <- data.frame(sites, 
+                    col_subtidal[match(sites$station_id,row.names(col_subtidal)
+                    ), ])
+op <- par(mfrow = c(2, 1), mar = c(4.1, 4.1, 1.1, 1.1))
+recluster.plot.col(col_subtidal)
+
+
+plot(sites[1],
+     col = rgb(red = sites$nmdsred,
+               green = sites$nmdsgreen,
+               blue = sites$nmdsblue,
+               maxColorValue = 255),
+     pch = 16, cex = .7, reset = FALSE)
+
+# Ajoutez les contours (grossiers) de la Bretagne avec le package rnaturalearth
+library(rnaturalearthdata)
+wm <- ne_coastline(scale = 50, returnclass = "sp")
+wm <- st_as_sf(wm)
+
+plot(wm[,1], add = TRUE)
+#Faire la classification ascendante hiérarchique
+hclu <- hclu_hierarclust(
+  Beta_sim,
+  index = "Simpson",
+  method = "average",
+  n_runs = 100, keep_trials = TRUE)
+plot(hclu)
+arbre_run1 <- hclu$algorithm$trials[[1]]$hierartree
+arbre_run1
+#couper l'arbre
+?cut_tree
+cut_tree <- cut_tree(hclu, cut_height = c(0.38))
+plot(cut_tree)
+cut_tree$clusters
+part <- partition_metrics(cut_tree, dissimilarity = Beta_sim, eval_metric = "pc_distance")
+?partition_metrics
+part
+find_optimal_n(part, criterion = "cutoff",
+                 metric_cutoffs = 0.5)
+?find_optimal_n
+cut_tree_2 <- cut_tree(hclu, n_clus = 50)
+
+cut_tree$clusters
+
+sites$clusters <- cut_tree$clusters[match(sites$station_id,
+                                                 cut_tree$clusters$ID), 
+
+                                                                             2] 
+ggplot() +
+  geom_sf(data = sites, aes(col = clusters)) +
+  geom_sf(data = wm) +
+  scale_color_discrete() +
+  xlim(-5, -1) + ylim(47, 49.5)
