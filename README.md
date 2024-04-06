@@ -1,31 +1,48 @@
-# Biogeography Repository
+# Biogeography Research Repository
 ## Overview
-This repository is dedicated to the study and analysis of biogeography, the branch of science that examines the distribution of species and ecosystems in geographic space and through geological time. It contains datasets, R scripts, and models related to various aspects of biogeography, including but not limited to species distribution models, biodiversity patterns, and ecological niche modeling.
+This repository serves as a comprehensive resource for researchers and enthusiasts in the field of **biogeography**. It is structured into four main directories, each focusing on a critical area of biogeography: 
+1. beta diversity
+2. bioregionalisation
+3. clustering
+4. modeling dispersal patterns ('modeling_dp').
+The repository includes datasets, R scripts, and methodologies designed to advance the study of species distribution, ecological diversity, and the processes driving the geographical organization of biological diversity.
 
-## Installation
-To use the scripts and datasets in this repository, you will need to have R installed on your machine. You can download R from CRAN. Additionally, some scripts may require specific R packages, which are listed in the requirements section below.
+## Contents
+### Beta Diversity (beta_diversity)
+Description:This section focuses on the analysis of beta diversity, which measures the change in species composition across different environments or geographical areas. The scripts and datasets here are used to calculate and visualize beta diversity indices among various habitats or regions.
+**Key Scripts**:
+- beta_div_calculation.R: Calculates beta diversity indices.
+- beta_div_visualization.R: Generates visualizations of beta diversity across different areas.
+### Bioregionalisation (bioregionalisation)
+Description: Bioregionalisation involves delineating spatially distinct areas that differ significantly in their species compositions. This section contains methods and algorithms for identifying and mapping these unique biological regions.
+**Key Scripts**:
+- bioregionalisation_analysis.R: Analyzes spatial data to identify distinct bioregions.
+- map_generation.R: Creates detailed maps showing the boundaries and characteristics of identified bioregions.
+### Clustering (clustering)
+Description: This directory applies clustering algorithms to biogeographical data to uncover patterns of similarity or dissimilarity among species or regions, aiding in the understanding of ecological and evolutionary processes.
+**Key Scripts**:
+- species_clustering.R: Clusters species based on ecological or genetic similarities.
+- region_clustering.R: Identifies clusters of geographically or ecologically similar regions.
+### Modeling Dispersal Patterns (modeling_dp)
+Description: Focuses on the modeling of species dispersal patterns to predict changes in distribution in response to various environmental factors or over time. This section includes models that simulate dispersal mechanisms and potential shifts in species ranges.
+**Key Scripts**:
+- dispersal_modeling.R: Models the dispersal patterns of species under different scenarios.
+- range_shift_analysis.R: Analyzes potential shifts in species ranges due to climate change or other factors.
+Installation
+Ensure you have R installed on your machine (visit CRAN for the latest version). Some scripts may require additional R packages, which can be installed as follows:
+```
+install.packages(c("sp", "raster", "dismo", "vegan", "ade4"))
+```
 
-## Requirements
-R (Version 4.3.3 or later)
-RStudio (Recommended for ease of use)
-Required R packages:
-  'sp' for spatial analysis
-  'raster' for handling raster data
-  'dismo' for species distribution modeling
-Please refer to the install_packages.R script for a complete list of required packages and installation instructions.
+## Contributing
+Contributions are welcome! If you're interested in contributing, please follow these steps:
+1. Fork the repository.
+2. Create a new branch for your feature or fix.
+3. Commit your changes.
+4. Push to the branch.Submit a pull request.
 
-Example Scripts
-species_distribution_model.R: This script demonstrates how to build a species distribution model using occurrence data and environmental variables.
-biodiversity_analysis.R: Analyzes patterns of biodiversity across different geographic regions.
-Contributing
-We welcome contributions from the community, whether it's adding new scripts, improving existing ones, or providing datasets.
+## License
+This project is licensed under the MIT License. See the LICENSE file in the root directory for details.
 
-License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
-Contact
-For questions or contributions, please open an issue on this repository, or contact the repository owner at pierrebdef@gmail.com.
-
-Acknowledgments
-This project makes use of data from GBIF and WorldClim for some of its analyses.
-Special thanks to all contributors and data providers, and a special thanks to Boris Leroy.
+## Contact
+For questions or suggestions, please open an issue on this repository, or contact pierrebdef@gmail.com
