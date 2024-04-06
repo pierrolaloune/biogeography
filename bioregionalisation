@@ -1,0 +1,108 @@
+#https://farewe.github.io/Cours_Bioregionalisation/ #Boris Leroy
+#charger le package bioregion
+setwd("C:/R")
+install.packages("bioregion")
+library(bioregion)
+library(RColorBrewer)
+library(sf)
+library(plyr)
+install_binaries()
+install_binaries(binpath = "C:/R/" , infomap_version = c("2.1.0", "2.6.0"))
+fish1 <- readRDS("data_cours (1)/data/data_cours/fishdb1.RDS")
+fish2 <- readRDS("data_cours (1)/data/data_cours/fishdb2.RDS")
+sf <- st_read("data_cours (1)/data/data_cours/basin_simplif.shp")
+
+fish_clusters1 <- netclu_infomap(net = fish1,
+                                 weight = FALSE,
+                                 binpath = "C:/R",
+                                 bipartite = TRUE,
+                                 site_col = "Basin",
+                                 species_col = "Species",
+                                 numtrials = 100,
+                                 show_hierarchy = TRUE,
+                                 bipartite_version = FALSE)
+#4 niveaux et niv 1 : 3, niv 2 : 7, niv 3 : 82, niv 4 : 112
+
+fish_clusters2 <- netclu_infomap(net = fish2,
+                                 weight = FALSE,
+                                 binpath = "C:/R",
+                                 bipartite = TRUE,
+                                 site_col = "Basin",
+                                 species_col = "Species",
+                                 numtrials = 100,
+                                 show_hierarchy = TRUE,
+                                 bipartite_version = FALSE)
+#Number of partitions:  4 - Partitions are hierarchical - Number of clusters:  5 46 84 94
+
+
+fish_clusters1$clusters$K_5
+count(fish_clusters1$clusters$K_5)
+count(fish_clusters1$clusters$K_49)
+
+clusters1 <- fish_clusters1$clusters
+which(clusters1$ID %in% fish1$Basin)
+site1 <- clusters1[which(clusters1$ID %in% fish1$Basin),]
+
+sp1 <- clusters1[which(clusters1$ID %in% fish1$Species),]
+sp1
+count(site1$K_5)
+count(site1$K_49)
+count(sp1$K_5)
+count(sp1$K_49)
+
+clusters2 <- fish_clusters2$clusters
+clusters2
+site2 <- clusters2[which(clusters2$ID %in% fish2$Basin),]
+
+sp2 <- clusters2[which(clusters2$ID %in% fish2$Species),]
+count(site2$K_5)
+
+# On commence par récupérer les noms des clusters de la partition de niveau 2
+# En regardant le tableau des clusters on voit qu'il s'agit de la 3e colonne
+clusters1_1 <- unique(clusters1[,2])
+clusters1_1
+
+# Ensuite, on crée un tableau avec les couleurs sur la deuxième colonne
+bioregions1 <- data.frame(
+  clusters = clusters1_1, # La première colonne contient les clusters
+  # La deuxième colonne contient les couleurs
+  colors = brewer.pal(length(clusters1_1), # On veut autant de couleurs que de clusters
+                      "Set2") # J'ai demandé la palette "Set2" ici, allez voir sur colorbrewer2.org pour voir les différents types de palettes existant
+)
+
+bioregions1
+
+clusters1$colors <- bioregions1$colors[match(clusters1[,2], bioregions1$clusters)]
+clusters1
+
+sf$colors <- clusters1$colors[match(sf$BasinName,
+                                    clusters1$ID)]
+sf
+map <- plot(sf[,1], col = sf$color, add = TRUE, graticule = TRUE)
+
+
+library(devtools)
+devtools::source_url("https://raw.githubusercontent.com/Farewe/Cours_Bioregionalisation/master/scripts/exportGDF.R")
+exportGDF(fish1, clusters = clusters1, filename = "Gephi_fish1.GDF", weight = FALSE, color.field = "colors")
+
+
+grr <-st_graticule()
+grr <- st_transform(grr, crs ="+proj=wintri")
+install.packages("rnaturalearthdata")
+install.packages("rnaturalearth")
+library(rnaturalearth)
+library(rnaturalearthdata)
+coast <- ne_coastline()
+library(sf)
+coast <- st_transform(coast, crs = "+proj=wintri")
+coast <- st_read("ne_50m_coastline/ne_50m_coastline.shp")
+install.packages("PROJ")
+basins_wt <- st_transform(sf,crs = "+proj=wintri")
+
+
+library(ggplot2)
+ggplot()+
+  geom_sf(data = grr)+
+  geom_sf(data = basins_wt, aes(fill = color)) +
+  geom_sf(data = coast) +
+  coord_sf(datum = NA)
